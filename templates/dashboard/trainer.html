@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Trainer Dashboard{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+        <div>
+            <h1>Welcome, {{ username }}!</h1>
+            <p style="color: #cbd5e1;">Monitor your students' progress and manage assessments.</p>
+        </div>
+        <div>
+            <span
+                style="background: rgba(236,72,153, 0.2); color: #ec4899; padding: 5px 15px; border-radius: 20px;">Trainer</span>
+        </div>
+    </div>
+
+    <h2>Enrolled Students</h2>
+    <div class="dashboard-grid">
+        {% for student in students %}
+        <div class="glass-card">
+            <h3>{{ student.username }}</h3>
+            <p style="font-size: 0.9rem; color: #a78bfa; margin-bottom: 0.5rem;">{{ student.email }}</p>
+            <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                <p><strong>Goal:</strong> {{ student.goal_course or 'Not set' }}</p>
+                <p><strong>Current:</strong> {{ student.current_course or 'Not set' }}</p>
+            </div>
+            <!-- Future: Add 'View Details' button here -->
+        </div>
+        {% else %}
+        <p>No students found.</p>
+        {% endfor %}
+    </div>
+
+    <h2 style="margin-top: 2rem;">Recent Student Activity (MCQ)</h2>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+        <thead>
+            <tr style="background: rgba(255,255,255,0.1); text-align: left;">
+                <th style="padding: 1rem;">Student</th>
+                <th style="padding: 1rem;">Topic</th>
+                <th style="padding: 1rem;">Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 1rem;">{{ result.username }}</td>
+                <td style="padding: 1rem;">{{ result.topic }}</td>
+                <td style="padding: 1rem;">
+                    <span class="{% if result.score > 2 %}bg-success-pill{% else %}bg-danger-pill{% endif %}">
+                        {{ result.score }}
+                    </span>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" style="padding: 1rem;">No recent test results available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

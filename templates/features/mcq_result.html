@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Test Result{% endblock %}
+
+{% block content %}
+<div class="glass-container" style="max-width: 600px; text-align: center;">
+    <h2><i class="fas fa-poll-h"></i> Test Results</h2>
+    <p style="color: #cbd5e1;">Here is your performance report for the <strong>{{ topic }}</strong> test.</p>
+
+    <div class="glass-card" style="margin-top: 2rem; padding: 3rem;">
+        <h3 style="font-size: 4rem; margin-bottom: 0;"
+            class="{% if score >= (total/2) %}text-success{% else %}text-danger{% endif %}">
+            {{ score }}<span style="font-size: 2rem; color: #d1d5db;">/{{ total }}</span>
+        </h3>
+        <p style="text-transform: uppercase; font-weight: bold; margin-top: 1rem; letter-spacing: 2px;">
+            {% if score == total %}
+            Excellent! Perfect Score!
+            {% elif score >= (total * 0.7) %}
+            Great Job! Keep it up.
+            {% elif score >= (total * 0.5) %}
+            Good Attempt. Needs Improvement.
+            {% else %}
+            Poor Performance. Keep Practicing.
+            {% endif %}
+        </p>
+
+        <div style="margin-top: 2rem;">
+            <a href="{{ url_for('mcq_test') }}" class="btn btn-primary">Take Another Test</a>
+        </div>
+    </div>
+
+    <div style="margin-top: 1rem;">
+        <a href="{{ url_for('dashboard') }}" style="color: #a78bfa; text-decoration: none;">&larr; Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

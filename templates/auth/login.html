@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Training App{% endblock %}
+
+{% block content %}
+<div class="glass-container" style="max-width: 400px; text-align: center;">
+    <h2>Welcome Back!</h2>
+    <p style="color: #cbd5e1; margin-bottom: 2rem;">Login to access your dashboard.</p>
+
+    {% if msg %}
+    <div style="background: rgba(236,72,153,0.2); padding: 10px; border-radius: 5px; margin-bottom: 20px;">{{ msg }}
+    </div>
+    {% endif %}
+
+    <form action="{{ url_for('login') }}" method="post">
+        <label for="username" style="display: block; text-align: left; margin-bottom: 5px;">Username</label>
+        <input type="text" name="username" placeholder="Enter Username" id="username" required>
+
+        <label for="password" style="display: block; text-align: left; margin-bottom: 5px;">Password</label>
+        <input type="password" name="password" placeholder="Enter Password" id="password" required>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login</button>
+    </form>
+
+    <p style="margin-top: 1.5rem; font-size: 0.9rem;">
+        Don't have an account? <a href="{{ url_for('register') }}"
+            style="color: #a78bfa; text-decoration: none;">Register Now</a>
+    </p>
+</div>
+{% endblock %}

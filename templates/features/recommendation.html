@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Training Recommendation{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <h2><i class="fas fa-magic"></i> AI Training Recommendations</h2>
+    <p style="color: #cbd5e1; margin-bottom: 2rem;">
+        Generate a personalized study plan based on your current skills and career goals.
+    </p>
+
+    <div class="glass-card">
+        <form method="POST">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div>
+                    <label>Current Course/Skill</label>
+                    <input type="text" name="current_course" placeholder="e.g. Python Basics" required>
+                </div>
+                <div>
+                    <label>Current Proficiency Level</label>
+                    <select name="current_level">
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+
+            <label style="margin-top: 1rem;">Goal Course/Target Skill</label>
+            <input type="text" name="goal_course" placeholder="e.g. Machine Learning Expert" required>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                <i class="fas fa-rocket"></i> Generate Roadmap
+            </button>
+        </form>
+    </div>
+
+    {% if roadmap %}
+    <div style="margin-top: 3rem;">
+        <h3><i class="fas fa-map-signs"></i> Your Personalized Roadmap</h3>
+        <div style="border-left: 2px solid #a78bfa; padding-left: 2rem; margin-top: 1.5rem;">
+            {% for step in roadmap %}
+            <div class="glass-card roadmap-step" style="position: relative;">
+                <div
+                    style="position: absolute; left: -2.6rem; top: 0; background: #ec4899; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #1e0533;">
+                </div>
+                <h4 style="color: #60a5fa; margin-bottom: 0.5rem;">{{ step.day }}: {{ step.title }}</h4>
+                <p style="color: #e5e7eb;">{{ step.description }}</p>
+                <div style="margin-top: 1rem;">
+                    <span
+                        style="font-size: 0.8rem; color: #a78bfa; text-transform: uppercase; font-weight: bold;">Resources:</span>
+                    <ul style="list-style: none; display: flex; gap: 1rem; margin-top: 0.5rem;">
+                        {% for res in step.resources %}
+                        <li><a href="#" style="color: #34d399; text-decoration: none;"><i class="fas fa-link"></i> {{
+                                res }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

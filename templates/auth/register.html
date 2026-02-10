@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Training App{% endblock %}
+
+{% block content %}
+<div class="glass-container" style="max-width: 500px;">
+    <h2 style="text-align: center;">Create Account</h2>
+    <p style="text-align: center; color: #cbd5e1; margin-bottom: 2rem;">Join as a Student or Trainer</p>
+
+    {% if msg %}
+    <div style="background: rgba(236,72,153,0.2); padding: 10px; border-radius: 5px; margin-bottom: 20px;">{{ msg }}
+    </div>
+    {% endif %}
+
+    <form action="{{ url_for('register') }}" method="post">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Choose a username" required>
+
+        <label>Email</label>
+        <input type="email" name="email" placeholder="Enter your email" required>
+
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Create a password" required>
+
+        <label>I am a:</label>
+        <select name="role" required>
+            <option value="" disabled selected>Select Role</option>
+            <option value="student">Student (I want to learn)</option>
+            <option value="trainer">Trainer (I want to manage students)</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Register</button>
+    </form>
+
+    <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+        Already have an account? <a href="{{ url_for('login') }}" style="color: #a78bfa; text-decoration: none;">Login
+            Here</a>
+    </p>
+</div>
+{% endblock %}

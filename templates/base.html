@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Training Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i> AI Trainer
+        </div>
+        <nav>
+            <ul>
+                {% if session.loggedin %}
+                <li><a href="{{ url_for('dashboard') }}">Home</a></li>
+                <li><a href="{{ url_for('about') }}">About</a></li>
+                {% if session.role == 'student' %}
+                <li><a href="{{ url_for('recommendation') }}">Training</a></li>
+                <li><a href="{{ url_for('ocr_generator') }}">OCR Gen</a></li>
+                <li><a href="{{ url_for('mcq_test') }}">MCQ Test</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('profile') }}">Profile</a></li>
+                <li><a href="{{ url_for('logout') }}" class="btn btn-primary" style="padding: 0.5rem 1rem;">Logout</a>
+                </li>
+                {% else %}
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}" class="btn btn-primary">Register</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <div class="main-content" style="width: 100%; display: flex; justify-content: center; padding: 2rem;">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="glass-card"
+            style="position: fixed; top: 100px; right: 20px; border-left: 5px solid #ec4899; z-index: 1000;">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        // Simple script to make alerts disappear
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.glass-card');
+            alerts.forEach(alert => {
+                if (alert.innerText.includes('You have successfully')) {
+                    alert.style.display = 'none';
+                }
+            });
+        }, 3000);
+    </script>
+</body>
+
+</html>

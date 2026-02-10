@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Training App{% endblock %}
+
+{% block content %}
+<div class="glass-container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+        <div>
+            <h1>Hello, {{ username }}!</h1>
+            <p style="color: #cbd5e1;">Welcome to your personalized learning dashboard.</p>
+        </div>
+        <div>
+            <span
+                style="background: rgba(139, 92, 246, 0.2); color: #a78bfa; padding: 5px 15px; border-radius: 20px;">Student</span>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Training Recommendation -->
+        <a href="{{ url_for('recommendation') }}" class="glass-card" style="text-decoration: none; color: inherit;">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-brain fa-3x" style="color: #ec4899;"></i>
+            </div>
+            <h3>Smart Roadmap</h3>
+            <p style="font-size: 0.9rem; color: #d1d5db;">Get a personalized learning path powered by AI based on your
+                goals.</p>
+            {% if profile.goal_course %}
+            <div
+                style="margin-top: 1rem; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 5px;">
+                Goal: {{ profile.goal_course }}
+            </div>
+            {% endif %}
+        </a>
+
+        <!-- OCR Generator -->
+        <a href="{{ url_for('ocr_generator') }}" class="glass-card" style="text-decoration: none; color: inherit;">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-file-alt fa-3x" style="color: #a78bfa;"></i>
+            </div>
+            <h3>OCR Question Gen</h3>
+            <p style="font-size: 0.9rem; color: #d1d5db;">Upload study material images and get instant practice
+                questions.</p>
+        </a>
+
+        <!-- MCQ Test -->
+        <a href="{{ url_for('mcq_test') }}" class="glass-card" style="text-decoration: none; color: inherit;">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-tasks fa-3x" style="color: #60a5fa;"></i>
+            </div>
+            <h3>Self Assessment</h3>
+            <p style="font-size: 0.9rem; color: #d1d5db;">Test your knowledge with AI-generated multiple choice
+                questions.</p>
+        </a>
+
+        <!-- Profile -->
+        <a href="{{ url_for('profile') }}" class="glass-card" style="text-decoration: none; color: inherit;">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="fas fa-user-circle fa-3x" style="color: #34d399;"></i>
+            </div>
+            <h3>My Profile</h3>
+            <p style="font-size: 0.9rem; color: #d1d5db;">Manage your account details and view your progress.</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

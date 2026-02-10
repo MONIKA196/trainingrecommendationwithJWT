@@ -1,0 +1,10 @@
+flask
+pillow
+pytesseract
+pandas
+numpy
+werkzeug
+PyPDF2
+google-generativeai
+python-dotenv
+mysql-connector-python
