@@ -1,24 +1,32 @@
 {% extends 'base.html' %}
 
-{% block title %}Training Recommendation{% endblock %}
+{% block title %}Study Plan | AI Trainer{% endblock %}
 
 {% block content %}
-<div class="glass-container">
-    <h2><i class="fas fa-magic"></i> AI Training Recommendations</h2>
-    <p style="color: #cbd5e1; margin-bottom: 2rem;">
-        Generate a personalized study plan based on your current skills and career goals.
-    </p>
+<div class="glass-container" style="max-width: 1000px; padding: 3.5rem;">
+    <div style="text-align: center; margin-bottom: 3.5rem;">
+        <h2 class="gradient-text" style="font-size: 3rem; margin-bottom: 1rem;">
+            <i class="fas fa-brain"></i> Study Plan
+        </h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+            Tell us your goals and we'll create a step-by-step training guide just for you.
+        </p>
+    </div>
 
-    <div class="glass-card">
+    <div class="glass-card" style="padding: 2.5rem; border-color: var(--primary-glow);">
         <form method="POST">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                 <div>
-                    <label>Current Course/Skill</label>
-                    <input type="text" name="current_course" placeholder="e.g. Python Basics" required>
+                    <label
+                        style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">What
+                        You Know</label>
+                    <input type="text" name="current_course" placeholder="e.g. Fundamental Python" required>
                 </div>
                 <div>
-                    <label>Current Proficiency Level</label>
-                    <select name="current_level">
+                    <label
+                        style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Your
+                        Level</label>
+                    <select name="current_level" style="cursor: pointer;">
                         <option value="Beginner">Beginner</option>
                         <option value="Intermediate">Intermediate</option>
                         <option value="Advanced">Advanced</option>
@@ -26,35 +34,62 @@
                 </div>
             </div>
 
-            <label style="margin-top: 1rem;">Goal Course/Target Skill</label>
-            <input type="text" name="goal_course" placeholder="e.g. Machine Learning Expert" required>
+            <div style="margin-top: 1rem;">
+                <label
+                    style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Study
+                    Goal</label>
+                <input type="text" name="goal_course" placeholder="e.g. Master React and Node.js" required>
+            </div>
 
-            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
-                <i class="fas fa-rocket"></i> Generate Roadmap
-            </button>
+            <div style="text-align: center; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary"
+                    style="padding: 1rem 4rem; height: 55px; border-radius: 14px;">
+                    <i class="fas fa-magic"></i> CREATE MY PLAN
+                </button>
+            </div>
         </form>
     </div>
 
     {% if roadmap %}
-    <div style="margin-top: 3rem;">
-        <h3><i class="fas fa-map-signs"></i> Your Personalized Roadmap</h3>
-        <div style="border-left: 2px solid #a78bfa; padding-left: 2rem; margin-top: 1.5rem;">
+    <div style="margin-top: 5rem; animation: fadeIn 1s ease;">
+        <h3 style="font-size: 1.8rem; margin-bottom: 3rem; text-align: center;" class="gradient-text">Your Learning Path
+        </h3>
+
+        <div style="position: relative;">
+            <!-- Vertical Line -->
+            <div
+                style="position: absolute; left: 30px; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--primary), var(--secondary), transparent);">
+            </div>
+
             {% for step in roadmap %}
-            <div class="glass-card roadmap-step" style="position: relative;">
+            <div class="glass-card step-container"
+                style="margin-left: 70px; position: relative; border-left: 1px solid var(--border); animation: slideUp 0.6s ease forwards; --delay: {{ loop.index0 }}; animation-delay: calc(var(--delay) * 0.15s); opacity: 0;">
+                <!-- Step Point -->
                 <div
-                    style="position: absolute; left: -2.6rem; top: 0; background: #ec4899; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #1e0533;">
+                    style="position: absolute; left: -50px; top: 20px; width: 20px; height: 20px; background: var(--bg-dark); border: 4px solid var(--primary); border-radius: 50%; box-shadow: 0 0 15px var(--primary-glow); z-index: 2;">
                 </div>
-                <h4 style="color: #60a5fa; margin-bottom: 0.5rem;">{{ step.day }}: {{ step.title }}</h4>
-                <p style="color: #e5e7eb;">{{ step.description }}</p>
-                <div style="margin-top: 1rem;">
+
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <h4 style="color: var(--secondary); font-size: 1.25rem;">{{ step.title }}</h4>
                     <span
-                        style="font-size: 0.8rem; color: #a78bfa; text-transform: uppercase; font-weight: bold;">Resources:</span>
-                    <ul style="list-style: none; display: flex; gap: 1rem; margin-top: 0.5rem;">
+                        style="font-size: 0.75rem; background: var(--border); padding: 4px 12px; border-radius: 50px; font-weight: 600;">{{
+                        step.day }}</span>
+                </div>
+
+                <p style="color: var(--text-muted); line-height: 1.6;">{{ step.description }}</p>
+
+                <div
+                    style="margin-top: 1.5rem; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 1rem;">
+                    <div style="display: flex; gap: 15px;">
                         {% for res in step.resources %}
-                        <li><a href="#" style="color: #34d399; text-decoration: none;"><i class="fas fa-link"></i> {{
-                                res }}</a></li>
+                        <a href="#"
+                            style="font-size: 0.8rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                            <i class="fas fa-folder-open" style="font-size: 0.7rem;"></i> {{ res }}
+                        </a>
                         {% endfor %}
-                    </ul>
+                    </div>
+                    <i class="fas fa-check-circle" style="color: rgba(255,255,255,0.05); font-size: 1.5rem;"></i>
                 </div>
             </div>
             {% endfor %}
@@ -62,4 +97,18 @@
     </div>
     {% endif %}
 </div>
+
+<style>
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
 {% endblock %}

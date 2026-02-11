@@ -1,40 +1,69 @@
 {% extends 'base.html' %}
 
-{% block title %}Register - Training App{% endblock %}
+{% block title %}Register | AI Trainer{% endblock %}
 
 {% block content %}
-<div class="glass-container" style="max-width: 500px;">
-    <h2 style="text-align: center;">Create Account</h2>
-    <p style="text-align: center; color: #cbd5e1; margin-bottom: 2rem;">Join as a Student or Trainer</p>
+<div class="glass-container" style="max-width: 550px; padding: 3.5rem 3rem; text-align: center;">
+    <div style="margin-bottom: 2.5rem;">
+        <div
+            style="width: 70px; height: 70px; background: var(--secondary-glow); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; transform: rotate(-5deg); border: 1px solid var(--border);">
+            <i class="fas fa-user-plus fa-2x" style="color: var(--secondary); transform: rotate(5deg);"></i>
+        </div>
+        <h2 class="gradient-text" style="font-size: 2.4rem; margin-bottom: 0.5rem;">Sign Up</h2>
+        <p style="color: var(--text-muted);">Create your account to start learning</p>
+    </div>
 
     {% if msg %}
-    <div style="background: rgba(236,72,153,0.2); padding: 10px; border-radius: 5px; margin-bottom: 20px;">{{ msg }}
+    <div
+        style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 12px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.9rem;">
+        <i class="fas fa-circle-exclamation" style="margin-right: 8px;"></i> {{ msg }}
     </div>
     {% endif %}
 
-    <form action="{{ url_for('register') }}" method="post">
-        <label>Username</label>
-        <input type="text" name="username" placeholder="Choose a username" required>
+    <form action="{{ url_for('register') }}" method="post" style="text-align: left;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div style="margin-bottom: 1.5rem;">
+                <label
+                    style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Username</label>
+                <input type="text" name="username" placeholder="johndoe" required>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label
+                    style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Email
+                    Address</label>
+                <input type="email" name="email" placeholder="john@example.com" required>
+            </div>
+        </div>
 
-        <label>Email</label>
-        <input type="email" name="email" placeholder="Enter your email" required>
+        <div style="margin-bottom: 1.5rem;">
+            <label
+                style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Security
+                Phrase</label>
+            <input type="password" name="password" placeholder="Create a strong password" required>
+        </div>
 
-        <label>Password</label>
-        <input type="password" name="password" placeholder="Create a password" required>
+        <div style="margin-bottom: 2rem;">
+            <label
+                style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Primary
+                Role</label>
+            <select name="role" required style="cursor: pointer;">
+                <option value="" disabled selected>Select your pathway...</option>
+                <option value="student">Student (Empower my learning)</option>
+                <option value="trainer">Trainer (Orchestrate excellence)</option>
+            </select>
+        </div>
 
-        <label>I am a:</label>
-        <select name="role" required>
-            <option value="" disabled selected>Select Role</option>
-            <option value="student">Student (I want to learn)</option>
-            <option value="trainer">Trainer (I want to manage students)</option>
-        </select>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Register</button>
+        <button type="submit" class="btn btn-primary"
+            style="width: 100%; justify-content: center; height: 55px; font-size: 1.1rem; background: linear-gradient(135deg, var(--secondary), #0891b2);">
+            Complete Registration <i class="fas fa-check" style="margin-left: 8px;"></i>
+        </button>
     </form>
 
-    <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
-        Already have an account? <a href="{{ url_for('login') }}" style="color: #a78bfa; text-decoration: none;">Login
-            Here</a>
-    </p>
+    <div style="margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Already have an account? <a href="{{ url_for('login') }}"
+                style="color: var(--secondary); text-decoration: none; font-weight: 600;">Login Here</a>
+        </p>
+    </div>
 </div>
 {% endblock %}

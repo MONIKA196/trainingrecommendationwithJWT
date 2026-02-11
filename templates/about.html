@@ -1,33 +1,52 @@
 {% extends 'base.html' %}
 
-{% block title %}About Us{% endblock %}
+{% block title %}Our Mission | AI Trainer{% endblock %}
 
 {% block content %}
-<div class="glass-container" style="max-width: 800px; text-align: center;">
-    <h2><i class="fas fa-info-circle"></i> About AI Training Platform</h2>
-    <p style="color: #cbd5e1; margin-bottom: 2rem;">
-        Empowering students and trainers with cutting-edge AI tools.
-    </p>
+<div class="glass-container" style="max-width: 900px; padding: 4rem 3rem; text-align: center;">
+    <div style="margin-bottom: 4rem;">
+        <h2 class="gradient-text" style="font-size: 3.5rem; margin-bottom: 1rem;">Our Mission</h2>
+        <p style="color: var(--text-muted); font-size: 1.2rem; max-width: 650px; margin: 0 auto;">
+            Empowering students with a simple and effective AI learning platform.
+        </p>
+    </div>
 
-    <div class="dashboard-grid glass-card" style="text-align: left;">
-        <div>
-            <h3><i class="fas fa-robot"></i> Advanced AI</h3>
-            <p>We leverage advanced Large Language Models and OCR technology to provide personalized learning
-                experiences.</p>
+    <div class="dashboard-grid">
+        <div class="glass-card" style="text-align: left; padding: 2rem;">
+            <div
+                style="width: 45px; height: 45px; background: var(--primary-glow); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                <i class="fas fa-brain" style="color: var(--primary);"></i>
+            </div>
+            <h3 style="font-size: 1.2rem;">Smart Engine</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Advanced processing to create personalized study
+                plans and path tracking.</p>
         </div>
-        <div>
-            <h3><i class="fas fa-users-cog"></i> Trainer Tools</h3>
-            <p>Trainers can easily track student progress, view test results, and manage their cohorts efficiently.</p>
+
+        <div class="glass-card" style="text-align: left; padding: 2rem;">
+            <div
+                style="width: 45px; height: 45px; background: var(--secondary-glow); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                <i class="fas fa-users-viewfinder" style="color: var(--secondary);"></i>
+            </div>
+            <h3 style="font-size: 1.2rem;">Trainer Dashboard</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Easy-to-use tools for trainers to track student
+                progress and growth.</p>
         </div>
-        <div>
-            <h3><i class="fas fa-chart-line"></i> Dynamic Progress</h3>
-            <p>Our adaptive roadmap system evolves with the student, ensuring that learning goals are always met.</p>
+
+        <div class="glass-card" style="text-align: left; padding: 2rem;">
+            <div
+                style="width: 45px; height: 45px; background: rgba(52, 211, 153, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                <i class="fas fa-microchip" style="color: #34d399;"></i>
+            </div>
+            <h3 style="font-size: 1.2rem;">Smart Scanner</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Quickly scan your study notes and turn them into key
+                study points.</p>
         </div>
     </div>
 
-    <div style="margin-top: 3rem;">
-        <p>Created for the modern learner.</p>
-        <p style="font-size: 0.8rem; color: #a78bfa;">&copy; 2024 AI Training Solutions</p>
+    <div style="margin-top: 5rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+        <p style="color: var(--text-muted); font-size: 0.9rem;">EST. 2026 // AI LEARNING PLATFORM</p>
+        <p style="font-size: 0.8rem; color: var(--primary); font-weight: 700; margin-top: 8px;">&copy; AI TRAINING
+            SOLUTIONS</p>
     </div>
 </div>
 {% endblock %}

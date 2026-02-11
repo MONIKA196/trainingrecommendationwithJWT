@@ -1,30 +1,59 @@
 {% extends 'base.html' %}
 
-{% block title %}Login - Training App{% endblock %}
+{% block title %}Login | AI Trainer{% endblock %}
 
 {% block content %}
-<div class="glass-container" style="max-width: 400px; text-align: center;">
-    <h2>Welcome Back!</h2>
-    <p style="color: #cbd5e1; margin-bottom: 2rem;">Login to access your dashboard.</p>
+<div class="glass-container" style="max-width: 450px; padding: 3.5rem 2.5rem; text-align: center;">
+    <div style="margin-bottom: 2.5rem;">
+        <div
+            style="width: 70px; height: 70px; background: var(--primary-glow); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; transform: rotate(10deg); border: 1px solid var(--border);">
+            <i class="fas fa-lock fa-2x" style="color: var(--primary); transform: rotate(-10deg);"></i>
+        </div>
+        <h2 class="gradient-text" style="font-size: 2.2rem; margin-bottom: 0.5rem;">Login</h2>
+        <p style="color: var(--text-muted);">Access your training dashboard</p>
+    </div>
 
     {% if msg %}
-    <div style="background: rgba(236,72,153,0.2); padding: 10px; border-radius: 5px; margin-bottom: 20px;">{{ msg }}
+    <div
+        style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 12px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.9rem;">
+        <i class="fas fa-circle-exclamation" style="margin-right: 8px;"></i> {{ msg }}
     </div>
     {% endif %}
 
-    <form action="{{ url_for('login') }}" method="post">
-        <label for="username" style="display: block; text-align: left; margin-bottom: 5px;">Username</label>
-        <input type="text" name="username" placeholder="Enter Username" id="username" required>
+    <form action="{{ url_for('login') }}" method="post" style="text-align: left;">
+        <div style="margin-bottom: 1.5rem;">
+            <label for="username"
+                style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: var(--text-muted);">Username</label>
+            <div style="position: relative;">
+                <i class="fas fa-user"
+                    style="position: absolute; left: 18px; top: 18px; color: var(--primary); opacity: 0.5;"></i>
+                <input type="text" name="username" placeholder="Username / Email" id="username" required
+                    style="padding-left: 50px;">
+            </div>
+        </div>
 
-        <label for="password" style="display: block; text-align: left; margin-bottom: 5px;">Password</label>
-        <input type="password" name="password" placeholder="Enter Password" id="password" required>
+        <div style="margin-bottom: 2rem;">
+            <label for="password"
+                style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: var(--text-muted);">Password</label>
+            <div style="position: relative;">
+                <i class="fas fa-key"
+                    style="position: absolute; left: 18px; top: 18px; color: var(--primary); opacity: 0.5;"></i>
+                <input type="password" name="password" placeholder="••••••••" id="password" required
+                    style="padding-left: 50px;">
+            </div>
+        </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Login</button>
+        <button type="submit" class="btn btn-primary"
+            style="width: 100%; justify-content: center; height: 55px; font-size: 1.1rem;">
+            Login <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+        </button>
     </form>
 
-    <p style="margin-top: 1.5rem; font-size: 0.9rem;">
-        Don't have an account? <a href="{{ url_for('register') }}"
-            style="color: #a78bfa; text-decoration: none;">Register Now</a>
-    </p>
+    <div style="margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Don't have an account? <a href="{{ url_for('register') }}"
+                style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign Up</a>
+        </p>
+    </div>
 </div>
 {% endblock %}

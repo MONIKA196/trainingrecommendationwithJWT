@@ -3,9 +3,12 @@ import mysql.connector
 import os
 import json
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 from PIL import Image
 import pytesseract
 import random
+import base64
+import requests
 # from dotenv import load_dotenv # Uncomment if utilizing .env
 # load_dotenv()
 
@@ -164,107 +167,101 @@ def generate_questions_from_text(text):
     return questions
 
 def analyze_image_with_gemini(image_path):
-    """Uses Gemini 1.5 Flash to extract text and generate key points directly from the image."""
+    """Uses Gemini 1.5 Flash REST API to extract text and generate key points directly from the image."""
     api_key = app.config.get('GEMINI_API_KEY')
     if not api_key or api_key == 'YOUR_GEMINI_API_KEY':
         return None
 
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
+        # 1. Read and encode the image
+        with open(image_path, "rb") as image_file:
+            encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
         
-        img = Image.open(image_path)
+        # 2. Prepare the payload
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        print(f"DEBUG: Using Gemini 2.5 REST API with model: gemini-2.5-flash")
         
         prompt = """
         You are an expert academic assistant. Analyze the provided image and perform two tasks:
-        
-        1. **Text Extraction**: Extract every single piece of readable text from the image, preserving the original order as much as possible.
+        1. **Text Extraction**: Extract every single piece of readable text from the image.
         2. **Insightful Summary**: Identify the most critical 'Important Key Points' from the extracted text.
-           - Provide 5 to 10 high-quality, distinct bullet points.
-           - Focus on definitions, formulas, main arguments, or crucial facts.
-           - Ensure the points are contextually accurate and useful for study.
+           - Provide 5 to 10 high-quality bullet points.
         
-        Return the response ONLY as a JSON object. Do not include any markdown formatting like ```json ... ```.
+        Return the response ONLY as a JSON object. 
         Strictly follow this structure:
         {
             "extracted_text": "...",
             "key_points": [
                 "Point 1...",
-                "Point 2...",
-                "Point 3..."
+                "Point 2..."
             ]
         }
         """
 
-        # Models to try, based on verified available models
-        models_to_try = [
-            'gemini-2.0-flash',        # Very fast and modern
-            'models/gemini-2.0-flash',
-            'gemini-2.5-flash',       # Newer flash version
-            'models/gemini-2.5-flash',
-            'gemini-flash-latest',
-            'models/gemini-flash-latest',
-            'gemini-2.5-pro',
-            'models/gemini-2.5-pro'
-        ]
-        
-        response = None
-        last_error = None
+        payload = {
+            "contents": [{
+                "parts": [
+                    {"text": prompt},
+                    {
+                        "inline_data": {
+                            "mime_type": "image/jpeg",
+                            "data": encoded_image
+                        }
+                    }
+                ]
+            }]
+        }
 
-        for model_name in models_to_try:
+        # 3. Call the API
+        headers = {'Content-Type': 'application/json'}
+        print(f"Sending request to Gemini API for image: {image_path}")
+        response = requests.post(url, headers=headers, json=payload)
+        response_data = response.json()
+        print(f"Gemini API Response Status: {response.status_code}")
+
+        # 4. Parse the AI response
+        if 'candidates' in response_data and len(response_data['candidates']) > 0:
+            text_response = response_data['candidates'][0]['content']['parts'][0]['text']
+            
+            # Robust JSON cleaning
+            txt = text_response.strip()
+            # Remove markdown code blocks if the AI added them
+            if txt.startswith("```"):
+                txt = txt.split("```")[1]
+                if txt.startswith("json"):
+                    txt = txt[4:]
+            
             try:
-                print(f"Attempting to use model: {model_name}")
-                model = genai.GenerativeModel(model_name)
-                # Try simple multimodal generation
-                response = model.generate_content([prompt, img])
-                if response and response.text:
-                    # Successfully got response
-                    break
-            except Exception as e:
-                print(f"Error with {model_name}: {e}")
-                last_error = e
-                continue
-        
-        if not response:
-            print(f"All Gemini models failed. Last error: {last_error}")
-            return None
-        
-        # Robust JSON cleaning
-        txt = response.text.strip()
-        try:
-            if "{" in txt:
-                # Try to find the first '{' and last '}'
+                # Find JSON bounds
                 start = txt.find("{")
                 end = txt.rfind("}") + 1
-                txt = txt[start:end]
-                return json.loads(txt)
-            else:
-                # If it's not JSON, maybe it's just text
+                if start != -1 and end != -1:
+                    txt = txt[start:end]
+                    return json.loads(txt)
+            except Exception as parse_err:
+                print(f"JSON Parsing failed: {parse_err}")
                 return {
-                    "extracted_text": txt,
-                    "key_points": [line.strip() for line in txt.split('\n') if len(line.strip()) > 20][:5]
+                    "extracted_text": txt[:500],
+                    "key_points": ["AI output was not in correct format, but text was found."]
                 }
-        except Exception as e:
-            print(f"JSON Parsing failed: {e}. Raw text: {txt}")
-            # Final fallback: just return the raw text if possible
-            return {
-                "extracted_text": txt[:500],
-                "key_points": ["Could not parse structured data, but text was extracted. See below."]
-            }
+        
+        print(f"API Error Response: {response_data}")
+        return None
         
     except Exception as e:
-        print(f"Gemini Vision Critical Error: {e}")
+        print(f"Gemini REST Critical Error: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def generate_questions_with_gemini_text_only(text):
-    """Legacy text-only generation (kept as backup)."""
-    if app.config.get('GEMINI_API_KEY') == 'YOUR_GEMINI_API_KEY' or not app.config.get('GEMINI_API_KEY'):
+    """REST version of text-only generation."""
+    api_key = app.config.get('GEMINI_API_KEY')
+    if not api_key or api_key == 'YOUR_GEMINI_API_KEY':
         return None
 
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=app.config['GEMINI_API_KEY'])
-        model = genai.GenerativeModel('gemini-pro')
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
         
         prompt = f"""
         Based on the following text, generate 3-5 multiple-choice questions.
@@ -272,18 +269,25 @@ def generate_questions_with_gemini_text_only(text):
         Each object must have the following keys:
         - "question": The question string.
         - "options": A list of 4 distinct options.
-        - "answer": The correct option string (must be one of the options).
+        - "answer": The correct option string.
         
-        Text content:
-        {text[:4000]}
+        Text: {text[:4000]}
         """
+
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}]
+        }
+
+        response = requests.post(url, headers={'Content-Type': 'application/json'}, json=payload)
+        response_data = response.json()
         
-        response = model.generate_content(prompt)
-        # Clean up code blocks if the model returns them
-        cleaned_text = response.text.replace('```json', '').replace('```', '').strip()
-        return json.loads(cleaned_text)
+        if 'candidates' in response_data:
+            txt = response_data['candidates'][0]['content']['parts'][0]['text']
+            txt = txt.replace('```json', '').replace('```', '').strip()
+            return json.loads(txt)
+        return None
     except Exception as e:
-        print(f"Gemini Error: {e}")
+        print(f"Gemini Text REST Error: {e}")
         return None
 
 def generate_mcq_questions(topic):
@@ -333,9 +337,12 @@ def login():
             return render_template('auth/login.html', msg=msg)
             
         cursor = db.cursor(dictionary=True)
-        cursor.execute('SELECT * FROM users WHERE username = %s AND password_hash = %s', (username, password))
+        # We only query by username now
+        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
         account = cursor.fetchone()
-        if account:
+        
+        # Verify the hash
+        if account and check_password_hash(account['password_hash'], password):
             session['loggedin'] = True
             session['id'] = account['id']
             session['username'] = account['username']
@@ -360,12 +367,20 @@ def register():
             return render_template('auth/register.html', msg=msg)
             
         cursor = db.cursor(dictionary=True)
-        cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+        # Check if username OR email already exists
+        cursor.execute('SELECT * FROM users WHERE username = %s OR email = %s', (username, email))
         account = cursor.fetchone()
+        
         if account:
-            msg = 'Account already exists!'
+            if account['username'] == username:
+                msg = 'Username already exists!'
+            else:
+                msg = 'Email already registered!'
         else:
-            cursor.execute('INSERT INTO users (username, email, password_hash, role) VALUES (%s, %s, %s, %s)', (username, email, password, role))
+            # Hash the password before saving
+            hashed_password = generate_password_hash(password)
+            cursor.execute('INSERT INTO users (username, email, password_hash, role) VALUES (%s, %s, %s, %s)', 
+                           (username, email, hashed_password, role))
             db.commit()
             
             # If student, create profile entry
@@ -581,4 +596,5 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"CRITICAL: Could not connect to database: {e}")
         
+    print("--- SERVER RESTARTED - SECURE VERSION V3 ---")
     app.run(debug=True)

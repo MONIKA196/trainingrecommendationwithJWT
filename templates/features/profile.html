@@ -1,36 +1,88 @@
 {% extends 'base.html' %}
 
-{% block title %}Profile{% endblock %}
+{% block title %}My Profile | AI Trainer{% endblock %}
 
 {% block content %}
-<div class="glass-container" style="max-width: 800px;">
-    <div style="text-align: center; margin-bottom: 2rem;">
-        <i class="fas fa-user-circle fa-5x" style="color: #60a5fa;"></i>
-        <h2>{{ user.username }}</h2>
-        <p style="color: a78bfa;">{{ user.role|title }}</p>
+<div class="glass-container" style="max-width: 900px; padding: 4rem 3rem;">
+    <div style="text-align: center; margin-bottom: 4rem; position: relative;">
+        <div
+            style="width: 120px; height: 120px; margin: 0 auto 1.5rem; position: relative; background: var(--primary-glow); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-user-circle fa-5x" style="color: var(--primary);"></i>
+        </div>
+        <h2 class="gradient-text" style="font-size: 2.5rem; margin-bottom: 0.5rem;">{{ user.username }}</h2>
+        <div style="display: flex; justify-content: center; gap: 10px; align-items: center;">
+            <span
+                style="background: var(--primary-glow); color: var(--primary); padding: 4px 15px; border-radius: 50px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">{{
+                user.role }}</span>
+            <span style="width: 6px; height: 6px; background: var(--border); border-radius: 50%;"></span>
+            <span style="color: var(--text-muted); font-size: 0.9rem;">Account Active</span>
+        </div>
     </div>
 
     <div class="dashboard-grid">
-        <div class="glass-card">
-            <h3><i class="fas fa-id-card"></i> Account Details</h3>
-            <p><strong>Username:</strong> {{ user.username }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Joined:</strong> {{ user.created_at }}</p>
+        <div class="glass-card" style="padding: 2rem;">
+            <h3 style="display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; color: var(--primary);">
+                <i class="fas fa-id-card"></i> Personal Details
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                    <p
+                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Username</p>
+                    <p style="font-weight: 600; font-size: 1.1rem;">{{ user.username }}</p>
+                </div>
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                    <p
+                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Email Address</p>
+                    <p style="font-weight: 600; font-size: 1.1rem;">{{ user.email }}</p>
+                </div>
+                <div>
+                    <p
+                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Created On</p>
+                    <p style="font-weight: 600; font-size: 1.1rem; font-family: monospace;">{{ user.created_at }}</p>
+                </div>
+            </div>
         </div>
 
         {% if session.role == 'student' %}
-        <div class="glass-card">
-            <h3><i class="fas fa-graduation-cap"></i> Learning Profile</h3>
-            <p><strong>Current Course:</strong> {{ details.current_course or 'Not Updated' }}</p>
-            <p><strong>Proficiency:</strong> {{ details.current_level or 'Not Updated' }}</p>
-            <p><strong>Target Goal:</strong> {{ details.goal_course or 'Not Updated' }}</p>
+        <div class="glass-card" style="padding: 2rem; border-color: var(--secondary-glow);">
+            <h3 style="display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; color: var(--secondary);">
+                <i class="fas fa-graduation-cap"></i> Learning Info
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                    <p
+                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Current Course</p>
+                    <p style="font-weight: 600; font-size: 1.1rem; color: var(--secondary);">{{ details.current_course
+                        or 'None' }}</p>
+                </div>
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                    <p
+                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Skill Level</p>
+                    <p style="font-weight: 600; font-size: 1.1rem; color: var(--secondary);">{{ details.current_level or
+                        'New' }}</p>
+                </div>
+                <div>
+                    <p
+                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Goal Course</p>
+                    <p style="font-weight: 600; font-size: 1.1rem; color: var(--accent);">{{ details.goal_course or 'Not
+                        Set' }}</p>
+                </div>
+            </div>
         </div>
         {% endif %}
     </div>
 
-    <div style="text-align: center; margin-top: 2rem;">
-        <a href="{{ url_for('logout') }}" class="btn btn-primary"
-            style="background: linear-gradient(90deg, #f87171, #ef4444);"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    <div style="text-align: center; margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+        <a href="{{ url_for('logout') }}" class="btn"
+            style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
+            <i class="fas fa-sign-out-alt"></i> LOGOUT
+        </a>
     </div>
 </div>
 {% endblock %}

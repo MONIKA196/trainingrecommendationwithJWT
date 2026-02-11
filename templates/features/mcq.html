@@ -1,65 +1,110 @@
 {% extends 'base.html' %}
 
-{% block title %}MCQ Test{% endblock %}
+{% block title %}Practice Test | AI Trainer{% endblock %}
 
 {% block content %}
-<div class="glass-container">
-    <h2><i class="fas fa-clipboard-check"></i> Self-Evaluation MCQ Test</h2>
-    <p style="color: #cbd5e1; margin-bottom: 2rem;">
-        Select a topic to generate a quick test and evaluate your knowledge.
-    </p>
+<div class="glass-container" style="max-width: 900px; padding: 3.5rem;">
+    <div style="text-align: center; margin-bottom: 3.5rem;">
+        <h2 class="gradient-text" style="font-size: 3rem; margin-bottom: 1rem;">
+            <i class="fas fa-microscope"></i> Practice Test
+        </h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+            Check your understanding with quick quizzes on any topic.
+        </p>
+    </div>
 
     {% if not questions %}
-    <div class="glass-card" style="max-width: 600px; margin: 0 auto;">
+    <div class="glass-card"
+        style="max-width: 600px; margin: 0 auto; padding: 3rem; border-color: var(--secondary-glow);">
         <form method="POST">
-            <label>Select Test Topic</label>
-            <select name="topic" required>
-                <option value="" disabled selected>Choose a Topic</option>
-                <option value="Python Programming">Python Programming</option>
+            <label
+                style="display: block; margin-bottom: 12px; font-weight: 500; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Choose
+                Topic</label>
+            <select name="topic" required style="height: 55px; border-radius: 14px;">
+                <option value="" disabled selected>Select a topic...</option>
+                <option value="Python Programming">Python</option>
                 <option value="Web Development">Web Development</option>
                 <option value="Data Science">Data Science</option>
                 <option value="Machine Learning">Machine Learning</option>
                 <option value="Cloud Computing">Cloud Computing</option>
             </select>
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
-                Start Test <i class="fas fa-arrow-right"></i>
+            <button type="submit" class="btn btn-primary"
+                style="width: 100%; margin-top: 1.5rem; height: 55px; border-radius: 14px; background: linear-gradient(135deg, var(--secondary), #0891b2);">
+                START TEST <i class="fas fa-chevron-right" style="margin-left: 10px;"></i>
             </button>
         </form>
     </div>
     {% else %}
-    <div class="glass-card">
-        <h3 style="text-align: center; margin-bottom: 2rem;">Topic: <span style="color: #ec4899;">{{ topic }}</span>
-        </h3>
+    <div class="glass-card" style="padding: 2.5rem; animation: fadeIn 0.8s ease;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem;">
+            <h3 style="margin: 0;">TOPIC: <span
+                    style="color: var(--secondary); font-family: 'JetBrains Mono', monospace;">{{ topic }}</span></h3>
+            <span
+                style="background: var(--secondary-glow); color: var(--secondary); padding: 5px 15px; border-radius: 50px; font-weight: 700; font-size: 0.8rem;">IN
+                PROGRESS</span>
+        </div>
+
         <form method="POST">
             <input type="hidden" name="topic_hidden" value="{{ topic }}">
             <input type="hidden" name="submit_test" value="true">
 
             {% for q in questions %}
-            <div style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+            <div
+                style="margin-bottom: 3rem; animation: slideUp 0.5s ease forwards; --delay: {{ loop.index0 }}; animation-delay: calc(var(--delay) * 0.1s); opacity: 0;">
+                <p style="font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 15px;">
                     <span
-                        style="background: rgba(139, 92, 246, 0.2); padding: 5px 10px; border-radius: 5px; margin-right: 10px;">Q{{
+                        style="background: var(--primary-glow); color: var(--primary); width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 800; font-size: 0.9rem; border: 1px solid var(--primary);">{{
                         loop.index }}</span>
-                    {{ q.question }}
+                    <span>{{ q.question }}</span>
                 </p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-left: 50px;">
                     {% for opt in q.options %}
-                    <label
-                        style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; transition: background 0.3s;">
+                    <label class="mcq-option"
+                        style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 1.2rem; border-radius: 12px; cursor: pointer; display: flex; align-items: center; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                         <input type="radio" name="q_{{ q.id }}" value="{{ opt }}" required
-                            style="width: auto; margin-right: 1rem; margin-bottom: 0;">
-                        {{ opt }}
+                            style="width: 18px; height: 18px; margin-right: 15px; accent-color: var(--secondary);">
+                        <span style="font-size: 0.95rem; color: #cbd5e1;">{{ opt }}</span>
                     </label>
                     {% endfor %}
                 </div>
             </div>
             {% endfor %}
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1.1rem;">
-                Submit Test <i class="fas fa-paper-plane"></i>
-            </button>
+            <div style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                <button type="submit" class="btn btn-primary"
+                    style="padding: 1rem 5rem; height: 60px; font-size: 1.1rem; border-radius: 16px;">
+                    FINISH TEST <i class="fas fa-paper-plane" style="margin-left: 10px;"></i>
+                </button>
+            </div>
         </form>
     </div>
     {% endif %}
 </div>
+
+<style>
+    .mcq-option:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--secondary);
+        transform: scale(1.02);
+    }
+
+    .mcq-option:has(input:checked) {
+        background: var(--secondary-glow);
+        border-color: var(--secondary);
+        box-shadow: 0 0 15px var(--secondary-glow);
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
 {% endblock %}
