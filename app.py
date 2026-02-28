@@ -12,10 +12,14 @@ import requests
 # from dotenv import load_dotenv # Uncomment if utilizing .env
 # load_dotenv()
 
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+
 app = Flask(__name__)
 
 # --- Configuration ---
 app.secret_key = 'your_secret_key_here'
+app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key_here'
+jwt = JWTManager(app)
 
 # MySQL Configuration (Update these with your MySQL Workbench credentials)
 # MySQL Configuration
@@ -114,12 +118,33 @@ def extract_text_from_image(image_path):
         tesseract_cmd = get_tesseract_path()
         if tesseract_cmd:
             pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
-        
+        else:
+            print("Tesseract not found. Manual installation required.")
+            return "Error: Local OCR engine (Tesseract) not found. \n\nPlease perform these 2 quick steps:\n1. Download Tesseract from: https://github.com/UB-Mannheim/tesseract/wiki/download\n2. Install it. No other configuration needed - the code will find it automatically."
+            
         text = pytesseract.image_to_string(Image.open(image_path))
         return text.strip()
     except Exception as e:
         print(f"OCR Error: {e}")
-        return "Error: Could not extract text. Ensure Tesseract-OCR is installed and added to PATH."
+        return f"OCR Error: {e}. Ensure Tesseract-OCR is installed correctly."
+
+def split_text_into_segments(text):
+    """Splits text into high-quality whole sentences, limited to five."""
+    if not text:
+        return []
+    
+    # Clean up whitespace
+    cleaned_text = " ".join(text.split())
+    
+    # Split by dots to get full sentences
+    raw_sentences = [s.strip() for s in cleaned_text.split('.') if len(s.strip()) > 10]
+    
+    # Take exactly 5 and add dots back
+    final_segments = []
+    for s in raw_sentences[:5]:
+        final_segments.append(f"{s}.")
+        
+    return final_segments
 
 def generate_questions_from_text(text):
     """Generates simple fill-in-the-blank questions from text."""
@@ -178,8 +203,8 @@ def analyze_image_with_gemini(image_path):
             encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
         
         # 2. Prepare the payload
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
-        print(f"DEBUG: Using Gemini 2.5 REST API with model: gemini-2.5-flash")
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
+        print(f"DEBUG: Using Gemini 1.5 REST API v1 with model: gemini-1.5-flash")
         
         prompt = """
         You are an expert academic assistant. Analyze the provided image and perform two tasks:
@@ -215,7 +240,7 @@ def analyze_image_with_gemini(image_path):
         # 3. Call the API
         headers = {'Content-Type': 'application/json'}
         print(f"Sending request to Gemini API for image: {image_path}")
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.post(url, headers=headers, json=payload, timeout=8)
         response_data = response.json()
         print(f"Gemini API Response Status: {response.status_code}")
 
@@ -248,6 +273,10 @@ def analyze_image_with_gemini(image_path):
         print(f"API Error Response: {response_data}")
         return None
         
+    except requests.exceptions.ConnectionError as ce:
+        print(f"Connection Error to Gemini API: {ce}")
+        print("Note: If you see 'getaddrinfo failed', it's likely a DNS issue or your internet is disconnected.")
+        return None
     except Exception as e:
         print(f"Gemini REST Critical Error: {e}")
         import traceback
@@ -261,7 +290,7 @@ def generate_questions_with_gemini_text_only(text):
         return None
 
     try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={api_key}"
         
         prompt = f"""
         Based on the following text, generate 3-5 multiple-choice questions.
@@ -398,6 +427,54 @@ def register():
             return redirect(url_for('dashboard'))
     return render_template('auth/register.html', msg=msg)
 
+# --- API Routes for Postman ---
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.get_json()
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({"msg": "Missing username or password"}), 400
+        
+    username = data['username']
+    password = data['password']
+    
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+    account = cursor.fetchone()
+    
+    if account and check_password_hash(account['password_hash'], password):
+        access_token = create_access_token(identity=str(account['id']))
+        return jsonify(access_token=access_token, user_id=account['id'], role=account['role']), 200
+    else:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+@app.route('/api/profile', methods=['GET'])
+@jwt_required()
+def api_profile():
+    current_user_id = get_jwt_identity()
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute('SELECT id, username, email, role FROM users WHERE id = %s', (current_user_id,))
+    user = cursor.fetchone()
+    return jsonify(user), 200
+
+@app.route('/api/ocr', methods=['POST'])
+@jwt_required()
+def api_ocr():
+    if 'file' not in request.files:
+        return jsonify({"msg": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"msg": "No selected file"}), 400
+        
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
+    
+    gemini_result = analyze_image_with_gemini(filepath)
+    return jsonify(gemini_result), 200
+
 @app.route('/logout')
 def logout():
     session.pop('loggedin', None)
@@ -409,7 +486,11 @@ def logout():
 @app.route('/dashboard')
 def dashboard():
     if 'loggedin' in session:
-        cursor = get_db().cursor(dictionary=True)
+        db = get_db()
+        if not db:
+            flash("Database connection failed.")
+            return redirect(url_for('login'))
+        cursor = db.cursor(dictionary=True)
         if session['role'] == 'student':
             # Create a default profile if it doesn't exist
             cursor.execute('SELECT * FROM student_profiles WHERE user_id = %s', (session['id'],))
@@ -465,10 +546,15 @@ def recommendation():
 def ocr_generator():
     if 'loggedin' not in session: return redirect(url_for('login'))
     
+    extracted_segments = []
     key_points = []
     extracted_text = None
     
-    cursor = get_db().cursor(dictionary=True)
+    db = get_db()
+    if db is None:
+        flash("Database connection error")
+        return redirect(url_for('dashboard'))
+    cursor = db.cursor(dictionary=True)
     
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -506,25 +592,38 @@ def ocr_generator():
                   
                   key_points = lines[:8] if lines else ["Text found but it looks too fragmented to extract points."]
              else:
-                  extracted_text = "Analysis Failed: The image might be too blurry or contains no readable text."
-                  key_points = ["Could not identify accurate points. Please ensure the image is well-lit and the text is clear."]
+                  # Ensure we don't save the error message as the "extracted text"
+                  if "Error:" in extracted_text:
+                      key_points = ["Local OCR Engine missing. Install Tesseract to enable offline mode."]
+                  else:
+                      extracted_text = "Analysis Failed: The image might be too blurry or contains no readable text."
+                      key_points = ["Could not identify accurate points. Please ensure the image is well-lit and the text is clear."]
+        
+        # Process into exactly 5 sentences for display
+        extracted_segments = split_text_into_segments(extracted_text)
         
         # Save to DB - ensure we save as JSON
+        # Note: We save the key_points for historical data, but the UI now focuses on the 5 segments
         cursor.execute('INSERT INTO ocr_uploads (user_id, image_filename, generated_text, generated_questions) VALUES (%s, %s, %s, %s)',
                        (session['id'], filename, extracted_text, json.dumps(key_points)))
-        get_db().commit()
+        db.commit()
     else:
         # GET request: Load the most recent upload if it exists
         cursor.execute('SELECT generated_text, generated_questions FROM ocr_uploads WHERE user_id = %s ORDER BY upload_date DESC LIMIT 1', (session['id'],))
         row = cursor.fetchone()
         if row:
             extracted_text = row['generated_text']
+            # Re-generate the 5 segments from the saved full text
+            extracted_segments = split_text_into_segments(extracted_text)
             try:
                 key_points = json.loads(row['generated_questions'])
             except:
                 key_points = []
-        
-    return render_template('features/ocr.html', key_points=key_points, extracted_text=extracted_text)
+    
+    cursor.close()
+    
+    # We prioritize extracted_segments in the template as the "Top 5 Points"
+    return render_template('features/ocr.html', key_points=key_points, extracted_text=extracted_text, extracted_segments=extracted_segments)
 
 @app.route('/mcq', methods=['GET', 'POST'])
 def mcq_test():
@@ -552,10 +651,15 @@ def mcq_test():
                     score += 1
             
             # Save Score
-            cursor = get_db().cursor(dictionary=True)
+            db = get_db()
+            if not db:
+                 flash("Database error")
+                 return redirect(url_for('dashboard'))
+            cursor = db.cursor(dictionary=True)
             cursor.execute('INSERT INTO mcq_results (user_id, topic, score, total_questions) VALUES (%s, %s, %s, %s)',
                            (session['id'], topic, score, total))
-            get_db().commit()
+            db.commit()
+            cursor.close()
             
             return render_template('features/mcq_result.html', score=score, total=total, topic=topic)
 
@@ -565,7 +669,11 @@ def mcq_test():
 def profile():
     if 'loggedin' not in session: return redirect(url_for('login'))
     
-    cursor = get_db().cursor(dictionary=True)
+    db = get_db()
+    if not db:
+        flash("Database connection failed")
+        return redirect(url_for('dashboard'))
+    cursor = db.cursor(dictionary=True)
     cursor.execute('SELECT * FROM users WHERE id = %s', (session['id'],))
     user = cursor.fetchone()
     
